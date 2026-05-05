@@ -1,0 +1,8 @@
+results/
+__pycache__/
+*.pt
+*.zip
+wandb/
+venv/
+.venv/
+*.pyc
