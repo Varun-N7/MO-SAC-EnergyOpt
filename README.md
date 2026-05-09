@@ -405,23 +405,9 @@ Dashboard, frontend UI, demo scripts, documentation
 
 ## 📄 Documentation
 
-File
-
-Description
-
-[`EVALUATION_METRICS.md`](https://claude.ai/chat/EVALUATION_METRICS.md)
-
-Metrics explained
-
-[`UNDERSTANDING_RL_METRICS.md`](https://claude.ai/chat/UNDERSTANDING_RL_METRICS.md)
-
-RL concepts
-
-[`REAL_DATA_INTEGRATION.md`](https://claude.ai/chat/REAL_DATA_INTEGRATION.md)
-
-Data pipeline details
-
-[`COMPLETE_PROJECT_EXPLANATION.md`](https://claude.ai/chat/COMPLETE_PROJECT_EXPLANATION.md)
-
-Full project walkthrough
-
+| File | Description |
+|------|-------------|
+| [EVALUATION_METRICS.md](./EVALUATION_METRICS.md) | Metrics explained |
+| [UNDERSTANDING_RL_METRICS.md](./UNDERSTANDING_RL_METRICS.md) | RL concepts |
+| [REAL_DATA_INTEGRATION.md](./REAL_DATA_INTEGRATION.md) | Data pipeline details |
+| [COMPLETE_PROJECT_EXPLANATION.md](./COMPLETE_PROJECT_EXPLANATION.md) | Full project walkthrough |
