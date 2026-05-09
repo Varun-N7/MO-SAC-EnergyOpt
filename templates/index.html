@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Grid Energy Management System | MO-RL-PeakShaving</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">⚡</span>
+                <span class="brand-text">Smart Grid EMS</span>
+            </div>
+            <div class="nav-status">
+                <div class="status-indicator" id="systemStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">System Online</span>
+                </div>
+                <div class="nav-time" id="currentTime"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">System Control</h3>
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>Controller Mode</label>
+                        <select id="policySelect" class="control-select">
+                            <option value="rl">RL Agent (PPO)</option>
+                            <option value="baseline">Baseline Controller</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Data Source</label>
+                        <select id="modeSelect" class="control-select">
+                            <option value="synthetic">Synthetic Environment</option>
+                            <option value="real">Real-World Dataset</option>
+                        </select>
+                    </div>
+                    <button id="runSimulationBtn" class="control-btn-primary">
+                        <span class="btn-icon">▶</span>
+                        Run Simulation
+                    </button>
+                    <button id="exportDataBtn" class="control-btn-secondary">
+                        <span class="btn-icon">📥</span>
+                        Export Results
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">System Parameters</h3>
+                <div class="param-grid" id="systemParams">
+                    <div class="param-item">
+                        <span class="param-label">Battery Capacity</span>
+                        <span class="param-value">10.0 kWh</span>
+                    </div>
+                    <div class="param-item">
+                        <span class="param-label">PV Peak Power</span>
+                        <span class="param-value">8.0 kW</span>
+                    </div>
+                    <div class="param-item">
+                        <span class="param-label">Comfort Threshold</span>
+                        <span class="param-value">0.60</span>
+                    </div>
+                    <div class="param-item">
+                        <span class="param-label">Peak Hours</span>
+                        <span class="param-value">18-22</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Dataset Status</h3>
+                <div class="dataset-status" id="datasetStatus">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Real-Time Metrics Dashboard -->
+            <section class="metrics-dashboard">
+                <h2 class="section-header">Real-Time Performance Metrics</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-icon">📊</span>
+                            <span class="metric-title">Peak Demand</span>
+                        </div>
+                        <div class="metric-value" id="metricPeak">--</div>
+                        <div class="metric-unit">kW</div>
+                        <div class="metric-trend" id="trendPeak"></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-icon">💰</span>
+                            <span class="metric-title">Total Cost</span>
+                        </div>
+                        <div class="metric-value" id="metricCost">--</div>
+                        <div class="metric-unit">INR</div>
+                        <div class="metric-trend" id="trendCost"></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-icon">😊</span>
+                            <span class="metric-title">Comfort Score</span>
+                        </div>
+                        <div class="metric-value" id="metricComfort">--</div>
+                        <div class="metric-unit">0-1 Scale</div>
+                        <div class="metric-trend" id="trendComfort"></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-icon">🎯</span>
+                        <span class="metric-title">Total Reward</span>
+                        </div>
+                        <div class="metric-value" id="metricReward">--</div>
+                        <div class="metric-unit">Cumulative</div>
+                        <div class="metric-trend" id="trendReward"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Simulation Control & Visualization -->
+            <section class="simulation-section">
+                <div class="section-header-row">
+                    <h2 class="section-header">Live 24-Hour Simulation</h2>
+                    <div class="simulation-info" id="simulationInfo">
+                        <span class="info-badge">Ready</span>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="episodeChart"></canvas>
+                </div>
+                <div class="simulation-summary" id="liveSimulationMetrics"></div>
+            </section>
+
+            <!-- Comparison Analysis -->
+            <section class="comparison-section">
+                <h2 class="section-header">RL Agent vs Baseline Controller</h2>
+                <div class="comparison-wrapper">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Real Dataset Analytics -->
+            <section class="dataset-section">
+                <h2 class="section-header">Real-World Dataset Analytics</h2>
+                <p class="section-description">
+                    Average daily profile computed from real-world time-series data (PV generation, load consumption, TOU pricing)
+                </p>
+                <div class="chart-wrapper">
+                    <canvas id="realDatasetChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Training Progress -->
+            <section class="training-section">
+                <h2 class="section-header">RL Training Progress</h2>
+                <div class="chart-wrapper">
+                    <canvas id="trainingChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Algorithm Comparison -->
+            <section class="comparison-section">
+                <h2 class="section-header">Algorithm Comparison (PPO vs SAC)</h2>
+                <div class="comparison-wrapper">
+                    <canvas id="algorithmChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Ablation Study -->
+            <section class="comparison-section">
+                <h2 class="section-header">Ablation Study (Reward Weights)</h2>
+                <div class="comparison-wrapper">
+                    <canvas id="ablationChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Pareto Trade-off -->
+            <section class="comparison-section">
+                <h2 class="section-header">Pareto Trade-off View</h2>
+                <div class="comparison-wrapper">
+                    <canvas id="paretoChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Final Summary Table -->
+            <section class="action-log-section">
+                <h2 class="section-header">Final Summary (Baseline vs PPO vs SAC)</h2>
+                <div class="simulation-summary" id="finalSummaryTable">
+                    <div class="loading">Loading final summary...</div>
+                </div>
+            </section>
+
+            <!-- Action History Log -->
+            <section class="action-log-section">
+                <h2 class="section-header">Action History</h2>
+                <div class="log-container" id="actionLog">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-message">System initialized. Ready for simulation.</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal">
+        <span id="modalClose" class="modal-close">&times;</span>
+        <img id="modalImage" class="modal-image">
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
